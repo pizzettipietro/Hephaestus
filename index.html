@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <!-- Faz a página se ajustar à largura do celular -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hephaestus</title>
+  <link rel="stylesheet" href="style.css">
+
+  <!-- ===== PWA: o que transforma o site em app ===== -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#121212">
+
+  <!-- Específico do iPhone (ele não lê tudo do manifest) -->
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Hephaestus">
+</head>
+<body>
+
+  <header>
+    <h1>Hephaestus</h1>
+  </header>
+
+  <main>
+
+    <!-- ===== TELA 1: TREINO DO DIA ===== -->
+    <section id="tela-hoje" class="tela ativa">
+      <!-- Seletor com todos os treinos criados. Já vem no treino da vez,
+           mas você pode trocar pra qualquer outro -->
+      <label for="select-treino" class="dica">Treino de hoje</label>
+      <select id="select-treino" class="select-grande"></select>
+
+      <!-- Ex: "2 de 5 exercícios feitos" -->
+      <p id="progresso-hoje" class="dica"></p>
+
+      <!-- O JavaScript vai preencher essa lista com os exercícios + checkbox -->
+      <ul id="lista-hoje" class="lista"></ul>
+
+      <div id="botoes-hoje" class="botoes">
+        <button id="btn-marcar-todos" class="secundario">Marcar todos</button>
+        <button id="btn-concluir">Concluir treino</button>
+      </div>
+    </section>
+
+    <!-- ===== TELA 2: EXERCÍCIOS + TREINOS ===== -->
+    <section id="tela-treinos" class="tela">
+
+      <!-- Primeiro você cadastra os exercícios... -->
+      <h2>Exercícios</h2>
+
+      <!-- O mesmo formulário serve pra ADICIONAR e pra EDITAR -->
+      <form id="form-exercicio" class="form-exercicio">
+        <div class="form-exercicio-topo">
+
+          <!-- Quadrado da foto: tocar nele abre a câmera/galeria -->
+          <label for="input-foto" class="foto-input">
+            <img id="preview-foto" class="escondido" alt="">
+            <span id="foto-placeholder">📷<br>Foto</span>
+          </label>
+          <input id="input-foto" type="file" accept="image/*" hidden>
+
+          <div class="campos">
+            <input id="input-exercicio" type="text" placeholder="Nome (ex: Supino reto)" required>
+            <div class="form-linha">
+              <input id="input-series" type="text" placeholder="Séries">
+              <input id="input-reps" type="text" placeholder="Reps">
+            </div>
+          </div>
+        </div>
+
+        <button type="button" id="btn-remover-foto" class="pequeno escondido">✕ Remover foto</button>
+
+        <div class="botoes">
+          <button type="button" id="btn-cancelar-edicao" class="secundario escondido">Cancelar</button>
+          <button type="submit" id="btn-salvar-exercicio">Adicionar</button>
+        </div>
+      </form>
+
+      <ul id="lista-exercicios" class="lista"></ul>
+
+      <!-- ...depois monta os treinos com eles -->
+      <h2>Treinos</h2>
+
+      <form id="form-treino" class="form-linha">
+        <input id="input-treino" type="text" placeholder="Ex: A - Peito" required>
+        <button type="submit">Criar</button>
+      </form>
+
+      <!-- Lista de treinos (a ordem aqui é a ordem da rotação A → B → C) -->
+      <ul id="lista-treinos" class="lista"></ul>
+
+      <!-- Aparece quando você toca em "Editar" num treino -->
+      <div id="editor-treino" class="escondido">
+        <div class="editor-topo">
+          <h3 id="editor-titulo"></h3>
+          <button id="btn-renomear-treino" class="pequeno">✏️ Renomear</button>
+        </div>
+        <p class="dica">Marque os exercícios deste treino:</p>
+        <ul id="editor-exercicios" class="lista"></ul>
+        <button id="btn-fechar-editor">Pronto</button>
+      </div>
+    </section>
+
+    <!-- ===== TELA 3: CONFIGURAÇÃO ===== -->
+    <section id="tela-config" class="tela">
+      <h2>Backup</h2>
+      <p class="dica">
+        Seus dados ficam só neste aparelho. Faça backup de vez em quando
+        e guarde o arquivo no Drive, e-mail ou WhatsApp.
+      </p>
+      <p id="info-backup" class="info-backup">Nenhum backup feito ainda.</p>
+
+      <div class="botoes">
+        <button id="btn-exportar">Exportar</button>
+        <!-- O input de arquivo fica escondido; o label funciona como botão -->
+        <label for="input-importar" class="botao secundario">Importar</label>
+        <input id="input-importar" type="file" accept=".json,application/json" hidden>
+      </div>
+
+      <!-- Só aparece em aparelhos que permitem compartilhar arquivos (celular) -->
+      <button id="btn-compartilhar" class="secundario largura-total escondido">
+        📤 Enviar backup (Drive, WhatsApp...)
+      </button>
+    </section>
+
+  </main>
+
+  <!-- ===== POPUP (usado pra confirmar exclusões e editar nomes) ===== -->
+  <div id="popup-fundo" class="popup-fundo escondido">
+    <div class="popup">
+      <h3 id="popup-titulo"></h3>
+      <p id="popup-texto"></p>
+      <input id="popup-input" type="text">
+      <div class="botoes">
+        <button id="popup-cancelar" class="secundario">Cancelar</button>
+        <button id="popup-confirmar">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MENU DE BAIXO ===== -->
+  <nav>
+    <button data-tela="tela-hoje" class="ativo">🏋️<span>Hoje</span></button>
+    <button data-tela="tela-treinos">📋<span>Treinos</span></button>
+    <button data-tela="tela-config">⚙️<span>Config</span></button>
+  </nav>
+
+  <script src="app.js"></script>
+</body>
+</html>

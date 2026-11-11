@@ -1,0 +1,341 @@
+/* ===== CORES (mude aqui pra trocar o tema inteiro) ===== */
+:root {
+  --fundo: #121212;
+  --cartao: #1e1e1e;
+  --texto: #f0f0f0;
+  --texto-fraco: #9a9a9a;
+  --destaque: #00eeff;
+  --texto-no-destaque: #0a0a0a; /* texto escuro em cima do ciano (branco não dá pra ler) */
+  --perigo: #e05555;
+}
+
+/* ===== BASE ===== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  background: var(--fundo);
+  color: var(--texto);
+  padding-bottom: 80px; /* espaço pro menu de baixo não cobrir o conteúdo */
+}
+
+header {
+  padding: 16px;
+  text-align: center;
+}
+
+main {
+  padding: 0 16px;
+}
+
+h2 { margin: 16px 0 12px; }
+h3 { margin: 16px 0 8px; }
+
+.dica {
+  color: var(--texto-fraco);
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+/* ===== TELAS: só a que tem a classe "ativa" aparece ===== */
+.tela { display: none; }
+.tela.ativa { display: block; }
+
+.escondido { display: none; }
+
+/* ===== LISTAS ===== */
+.lista {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.lista li {
+  background: var(--cartao);
+  padding: 14px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lista li span { flex: 1; } /* o nome ocupa o espaço que sobra */
+
+/* Aviso de lista vazia */
+.lista li.vazio {
+  background: none;
+  color: var(--texto-fraco);
+  font-size: 14px;
+  padding: 4px 0;
+}
+
+#editor-treino {
+  border-top: 1px solid #333;
+  margin-top: 8px;
+}
+
+.editor-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ===== POPUP ===== */
+/* Fundo escuro que cobre a tela inteira */
+.popup-fundo {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 10; /* fica por cima de tudo, inclusive do menu */
+}
+
+.popup-fundo.escondido { display: none; }
+
+/* A caixinha do meio */
+.popup {
+  background: var(--cartao);
+  border-radius: 14px;
+  padding: 20px;
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.popup h3 { margin: 0; }
+
+.popup p { color: var(--texto-fraco); }
+
+.popup .botoes { margin: 4px 0 0; }
+
+/* Botão vermelho pra ações de excluir */
+button.vermelho { background: var(--perigo); color: white; }
+
+/* Checkbox grande, fácil de tocar com o dedo */
+input[type="checkbox"] {
+  width: 24px;
+  height: 24px;
+  accent-color: var(--destaque);
+}
+
+/* ===== BOTÕES ===== */
+button, .botao {
+  background: var(--destaque);
+  color: var(--texto-no-destaque);
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 16px;
+  cursor: pointer;
+  text-align: center;
+}
+
+button.secundario, .botao.secundario {
+  background: var(--cartao);
+  color: var(--destaque);
+  border: 1px solid var(--destaque);
+}
+
+button.perigo {
+  background: transparent;
+  color: var(--perigo);
+  padding: 4px 8px;
+}
+
+button.pequeno {
+  background: transparent;
+  color: var(--texto-fraco);
+  padding: 4px 8px;
+}
+
+.botoes {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.botoes > * { flex: 1; }
+
+/* ===== FORMULÁRIOS ===== */
+.form-linha {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+input[type="text"], input[type="number"], select {
+  min-width: 0; /* deixa o campo encolher sem estourar a tela */
+  flex: 1;
+  background: var(--cartao);
+  color: var(--texto);
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 16px; /* 16px evita o zoom automático no iPhone */
+}
+
+/* ===== FORMULÁRIO DE EXERCÍCIO ===== */
+.form-exercicio {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.form-exercicio-topo {
+  display: flex;
+  gap: 8px;
+}
+
+/* Quadrado tracejado onde vai a foto */
+.foto-input {
+  width: 100px;
+  height: 100px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: var(--cartao);
+  border: 1px dashed #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--texto-fraco);
+  font-size: 13px;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.foto-input img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* preenche o quadrado sem distorcer */
+}
+
+.campos {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.campos .form-linha { margin: 0; }
+
+#btn-remover-foto { align-self: flex-start; }
+
+/* ===== FOTO PEQUENA NAS LISTAS ===== */
+.miniatura {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #2a2a2a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+/* Bloquinho de "4 séries" / "12 reps" */
+.info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 42px;
+}
+
+.info strong { font-size: 18px; }
+
+.info small {
+  font-size: 11px;
+  color: var(--texto-fraco);
+}
+
+/* Linha de detalhe embaixo do nome (aba Treinos) */
+.sub {
+  display: block;
+  font-size: 13px;
+  color: var(--texto-fraco);
+}
+
+/* Seletor de treino no topo da tela Hoje */
+.select-grande {
+  width: 100%;
+  font-size: 20px;
+  font-weight: bold;
+  margin: 4px 0 8px;
+}
+
+/* Exercício marcado como feito fica riscado e apagadinho */
+.lista li.feito span {
+  text-decoration: line-through;
+  color: var(--texto-fraco);
+}
+
+/* Na tela Hoje, a linha inteira é clicável (label) */
+#lista-hoje label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  cursor: pointer;
+}
+
+/* ===== MENU DE BAIXO ===== */
+nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  background: var(--cartao);
+  border-top: 1px solid #333;
+}
+
+nav button {
+  flex: 1;
+  background: none;
+  border-radius: 0;
+  font-size: 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--texto-fraco);
+}
+
+nav button span { font-size: 12px; }
+
+nav button.ativo { color: var(--destaque); }
+
+/* ===== BACKUP ===== */
+.info-backup {
+  background: var(--cartao);
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+
+/* Fica amarelo quando o último backup está velho */
+.info-backup.atrasado { color: #ffcc44; }
+
+.largura-total { width: 100%; }
+
+/* Nome do app no topo */
+header h1 {
+  color: var(--destaque);
+  letter-spacing: 2px;
+  text-shadow: 0 0 12px rgba(0, 238, 255, 0.4); /* brilho leve, efeito "neon" */
+}
