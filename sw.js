@@ -1,19 +1,23 @@
 // ===================================================
 // SERVICE WORKER: faz o app funcionar sem internet
 // ===================================================
-// Ele roda "por trás" do app e guarda uma cópia dos arquivos no celular.
-// Quando o app pede um arquivo, o service worker entrega a cópia guardada.
+// Estratégia "internet primeiro":
+//   - COM internet: sempre busca a versão mais nova no GitHub
+//     e aproveita pra atualizar a cópia guardada no celular
+//   - SEM internet: usa a cópia guardada
 //
-// ⚠️ IMPORTANTE: toda vez que você mudar algum arquivo do app,
-// aumente a versão aqui (v1 → v2 → v3...). É assim que o celular
-// percebe que tem atualização e baixa os arquivos novos.
-const VERSAO = 'hefesto-v3';
+// Assim toda atualização aparece sozinha na próxima vez que você
+// abrir o app com internet, sem precisar fechar e abrir várias vezes.
+//
+// Ainda vale mudar a versão aqui quando atualizar (v5 → v6...),
+// pra limpar as cópias antigas.
+const VERSAO = 'hefesto-v5';
 
-// Lista dos arquivos que o app precisa pra funcionar
 const ARQUIVOS = [
   './',
   './index.html',
   './style.css',
+  './biblioteca.js',
   './app.js',
   './manifest.json',
   './icon-192.png',
@@ -21,11 +25,16 @@ const ARQUIVOS = [
   './apple-touch-icon.png'
 ];
 
-// 1. INSTALAR: baixa e guarda todos os arquivos
+// 1. INSTALAR: guarda todos os arquivos
 self.addEventListener('install', function (evento) {
   evento.waitUntil(
     caches.open(VERSAO).then(function (cache) {
-      return cache.addAll(ARQUIVOS);
+      // cache: 'reload' = ignora o cache do navegador e baixa direto do GitHub
+      // (era aqui o problema: antes ele podia guardar a versão velha)
+      const pedidos = ARQUIVOS.map(function (url) {
+        return new Request(url, { cache: 'reload' });
+      });
+      return cache.addAll(pedidos);
     })
   );
   self.skipWaiting(); // ativa a versão nova sem esperar
@@ -45,12 +54,23 @@ self.addEventListener('activate', function (evento) {
   self.clients.claim();
 });
 
-// 3. BUSCAR: quando o app pede um arquivo, entrega a cópia guardada.
-//    Se não tiver cópia, busca na internet.
+// 3. BUSCAR: tenta a internet primeiro; se falhar (offline), usa a cópia
 self.addEventListener('fetch', function (evento) {
+  if (evento.request.method !== 'GET') return;
+
   evento.respondWith(
-    caches.match(evento.request).then(function (copia) {
-      return copia || fetch(evento.request);
-    })
+    fetch(evento.request, { cache: 'no-cache' })
+      .then(function (resposta) {
+        // Deu certo: guarda uma cópia atualizada pra usar offline
+        const copia = resposta.clone();
+        caches.open(VERSAO).then(function (cache) {
+          cache.put(evento.request, copia);
+        });
+        return resposta;
+      })
+      .catch(function () {
+        // Sem internet: entrega a cópia guardada
+        return caches.match(evento.request, { ignoreSearch: true });
+      })
   );
 });
