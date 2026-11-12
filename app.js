@@ -326,7 +326,7 @@ function renderizarExercicios() {
   listaExercicios.innerHTML = ''; // apaga a lista antiga
 
   if (dados.exercicios.length === 0) {
-    mensagemVazia(listaExercicios, 'Nenhum exercício cadastrado ainda.');
+    mensagemVazia(listaExercicios, 'Nenhum exercício ainda. Use a biblioteca 📚 ou cadastre o seu.');
     return;
   }
 
@@ -411,6 +411,157 @@ function excluirExercicio(id) {
     }
   });
 }
+
+
+// ===================================================
+// 4.1 BIBLIOTECA (adicionar exercícios prontos)
+// ===================================================
+// A lista de exercícios fica no arquivo biblioteca.js (constante BIBLIOTECA)
+
+const painelBiblioteca = document.getElementById('biblioteca');
+const listaBiblioteca = document.getElementById('lista-biblioteca');
+const buscaBiblioteca = document.getElementById('busca-biblioteca');
+const btnAdicionarBiblioteca = document.getElementById('btn-adicionar-biblioteca');
+
+// Nomes dos exercícios marcados no painel. Set = lista que não repete itens
+let selecionados = new Set();
+
+document.getElementById('btn-abrir-biblioteca').addEventListener('click', function () {
+  selecionados = new Set();
+  buscaBiblioteca.value = '';
+  renderizarBiblioteca();
+  painelBiblioteca.classList.remove('escondido');
+});
+
+document.getElementById('btn-fechar-biblioteca').addEventListener('click', fecharBiblioteca);
+
+function fecharBiblioteca() {
+  painelBiblioteca.classList.add('escondido');
+}
+
+// A cada letra digitada na busca, redesenha a lista filtrada
+buscaBiblioteca.addEventListener('input', renderizarBiblioteca);
+
+// Deixa o texto minúsculo e sem acento, pra "triceps" achar "Tríceps"
+function normalizar(texto) {
+  return texto.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
+// Confere se você já tem um exercício com esse nome
+function jaTemExercicio(nome) {
+  return dados.exercicios.some(function (ex) {
+    return normalizar(ex.nome) === normalizar(nome);
+  });
+}
+
+function renderizarBiblioteca() {
+  listaBiblioteca.innerHTML = '';
+  const busca = normalizar(buscaBiblioteca.value.trim());
+  let achouAlgum = false;
+
+  BIBLIOTECA.forEach(function (grupo) {
+    // Filtra os exercícios da categoria pela busca
+    // (se buscar "peito", mostra a categoria Peito inteira)
+    const categoriaBate = normalizar(grupo.categoria).includes(busca);
+    const itens = grupo.exercicios.filter(function (item) {
+      return categoriaBate || normalizar(item[0]).includes(busca);
+    });
+    if (itens.length === 0) return; // categoria sem resultado: pula
+
+    achouAlgum = true;
+
+    const titulo = document.createElement('h3');
+    titulo.className = 'categoria';
+    titulo.textContent = grupo.categoria;
+    listaBiblioteca.appendChild(titulo);
+
+    const ul = document.createElement('ul');
+    ul.className = 'lista';
+
+    itens.forEach(function (item) {
+      const nome = item[0], series = item[1], reps = item[2];
+      const jaTem = jaTemExercicio(nome);
+
+      const li = document.createElement('li');
+      if (jaTem) li.classList.add('ja-tem');
+
+      const label = document.createElement('label');
+      label.style.display = 'flex';
+      label.style.alignItems = 'center';
+      label.style.gap = '12px';
+      label.style.flex = '1';
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = jaTem || selecionados.has(nome);
+      checkbox.disabled = jaTem; // já tem: não deixa marcar de novo
+      checkbox.addEventListener('change', function () {
+        if (checkbox.checked) selecionados.add(nome);
+        else selecionados.delete(nome);
+        atualizarBotaoBiblioteca();
+      });
+
+      const texto = document.createElement('span');
+      texto.textContent = nome;
+      const sub = document.createElement('small');
+      sub.className = 'sub';
+      sub.textContent = jaTem ? 'Já está na sua lista' : series + ' séries × ' + reps + ' reps';
+      texto.appendChild(sub);
+
+      label.appendChild(checkbox);
+      label.appendChild(texto);
+      li.appendChild(label);
+      ul.appendChild(li);
+    });
+
+    listaBiblioteca.appendChild(ul);
+  });
+
+  if (!achouAlgum) {
+    const aviso = document.createElement('p');
+    aviso.className = 'dica';
+    aviso.textContent = 'Nada encontrado. Você pode cadastrar esse exercício manualmente.';
+    listaBiblioteca.appendChild(aviso);
+  }
+
+  atualizarBotaoBiblioteca();
+}
+
+// Mostra quantos estão marcados no botão: "Adicionar (3)"
+function atualizarBotaoBiblioteca() {
+  const qtd = selecionados.size;
+  btnAdicionarBiblioteca.textContent = qtd > 0 ? 'Adicionar (' + qtd + ')' : 'Adicionar';
+  btnAdicionarBiblioteca.disabled = qtd === 0;
+  btnAdicionarBiblioteca.style.opacity = qtd === 0 ? '0.5' : '1';
+}
+
+btnAdicionarBiblioteca.addEventListener('click', function () {
+  // Procura cada nome marcado na biblioteca e cria o exercício
+  BIBLIOTECA.forEach(function (grupo) {
+    grupo.exercicios.forEach(function (item) {
+      if (selecionados.has(item[0]) && !jaTemExercicio(item[0])) {
+        dados.exercicios.push({
+          id: novoId(),
+          nome: item[0],
+          series: item[1],
+          reps: item[2],
+          foto: null
+        });
+      }
+    });
+  });
+
+  const qtd = selecionados.size;
+  salvar();
+  fecharBiblioteca();
+  atualizarTela();
+
+  abrirPopup({
+    titulo: plural(qtd, 'exercício adicionado', 'exercícios adicionados') + ' ✅',
+    texto: 'Agora é só montar seus treinos com eles lá embaixo.',
+    soAviso: true
+  });
+});
 
 
 // ===================================================
@@ -835,19 +986,38 @@ document.getElementById('btn-exportar').addEventListener('click', function () {
 });
 
 // --- Enviar: abre o menu de compartilhar do celular ---
-// navigator.canShare verifica se o aparelho consegue compartilhar arquivos
-const testeArquivo = new File(['{}'], 'teste.json', { type: 'application/json' });
+// Por que .txt e não .json? O Android e o iPhone só deixam compartilhar alguns
+// tipos de arquivo, e .json NÃO está na lista. Então mandamos o mesmo conteúdo
+// com extensão .txt. O Importar aceita os dois formatos.
+function arquivoParaCompartilhar() {
+  const arquivo = criarArquivoBackup();
+  const nomeTxt = arquivo.name.replace('.json', '.txt');
+  return new File([arquivo], nomeTxt, { type: 'text/plain' });
+}
+
+// Só mostra o botão se o aparelho consegue compartilhar esse tipo de arquivo
+const testeArquivo = new File(['{}'], 'teste.txt', { type: 'text/plain' });
 if (navigator.canShare && navigator.canShare({ files: [testeArquivo] })) {
   btnCompartilhar.classList.remove('escondido');
 }
 
 btnCompartilhar.addEventListener('click', function () {
-  const arquivo = criarArquivoBackup();
+  const arquivo = arquivoParaCompartilhar();
   renderizarBackup();
 
-  navigator.share({ files: [arquivo], title: 'Backup Hephaestus' })
-    .catch(function () {
-      // Cai aqui se você fechar o menu sem escolher nada: não precisa fazer nada
+  // Manda só o arquivo (sem título/texto: alguns apps, como o WhatsApp,
+  // descartam o arquivo quando vem texto junto)
+  navigator.share({ files: [arquivo] })
+    .catch(function (erro) {
+      // AbortError = você fechou o menu sem escolher nada: tudo bem
+      if (erro.name === 'AbortError') return;
+
+      // Qualquer outro erro: avisa em vez de ficar em silêncio
+      abrirPopup({
+        titulo: 'Não deu pra enviar 😕',
+        texto: 'Use o botão Exportar e envie o arquivo pela pasta de downloads. (Erro: ' + erro.name + ')',
+        soAviso: true
+      });
     });
 });
 

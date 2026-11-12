@@ -50,6 +50,10 @@
       <!-- Primeiro você cadastra os exercícios... -->
       <h2>Exercícios</h2>
 
+      <button id="btn-abrir-biblioteca" class="secundario largura-total espaco-baixo">
+        📚 Adicionar da biblioteca
+      </button>
+
       <!-- O mesmo formulário serve pra ADICIONAR e pra EDITAR -->
       <form id="form-exercicio" class="form-exercicio">
         <div class="form-exercicio-topo">
@@ -116,7 +120,7 @@
         <button id="btn-exportar">Exportar</button>
         <!-- O input de arquivo fica escondido; o label funciona como botão -->
         <label for="input-importar" class="botao secundario">Importar</label>
-        <input id="input-importar" type="file" accept=".json,application/json" hidden>
+        <input id="input-importar" type="file" accept=".json,.txt,application/json,text/plain" hidden>
       </div>
 
       <!-- Só aparece em aparelhos que permitem compartilhar arquivos (celular) -->
@@ -126,6 +130,22 @@
     </section>
 
   </main>
+
+  <!-- ===== BIBLIOTECA (painel de tela cheia) ===== -->
+  <div id="biblioteca" class="painel escondido">
+    <div class="painel-topo">
+      <h2>Biblioteca</h2>
+      <input id="busca-biblioteca" type="text" placeholder="🔍 Buscar exercício...">
+    </div>
+
+    <!-- O JavaScript preenche com as categorias e exercícios -->
+    <div id="lista-biblioteca" class="painel-conteudo"></div>
+
+    <div class="painel-rodape botoes">
+      <button id="btn-fechar-biblioteca" class="secundario">Cancelar</button>
+      <button id="btn-adicionar-biblioteca">Adicionar</button>
+    </div>
+  </div>
 
   <!-- ===== POPUP (usado pra confirmar exclusões e editar nomes) ===== -->
   <div id="popup-fundo" class="popup-fundo escondido">
@@ -142,11 +162,12 @@
 
   <!-- ===== MENU DE BAIXO ===== -->
   <nav>
-    <button data-tela="tela-hoje" class="ativo">🏋️<span>Hoje</span></button>
-    <button data-tela="tela-treinos">📋<span>Treinos</span></button>
-    <button data-tela="tela-config">⚙️<span>Config</span></button>
+    <button data-tela="tela-hoje" class="ativo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg><span>Hoje</span></button>
+    <button data-tela="tela-treinos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"/></svg><span>Treinos</span></button>
+    <button data-tela="tela-config"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Config</span></button>
   </nav>
 
+  <script src="biblioteca.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
